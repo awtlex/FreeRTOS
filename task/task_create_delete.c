@@ -39,7 +39,7 @@
     }
  }
 
-/*--------------------------------------------------------------------------------*/
+/*------------------------------2个任务分别独立创建-------------------------------------*/
 #include <...>
 
 void vTask1(void *pvParameters)
@@ -87,6 +87,64 @@ int main(void)
               NULL);//不会用到任务句柄
   /*再创建一个*/
   xTaskCreate(vTask2, "Task 2", 1000, NULL, 1, NULL);
+
+  /*启动调度器，任务开始执行*/
+  vTaskStartScheduler();
+
+  /*正常情况下，main函数不会执行到这里；否则很可能是内存堆空间不足导致任务无法创建*/
+  for( ;; );
+}
+
+
+/*-------------------------------------Task1 创建 Task2--------------------------*/
+#include <...>
+
+
+void vTask2(void *pvParameters)
+{
+const char *pcTaskName = "Task 2 is running\r\n";
+volatile unsigned long u2;
+  for( ;; )
+  {
+    vPrintString(pcTaskName);
+    for(u2 = 0; u2 < mainDELAY_LOOP_COUNT; u2++)
+    {
+
+    }
+  }
+}
+
+void vTask1(void *pvParameters)
+{
+const char *pcTaskName = "Task 1 is running\r\n";
+volatile unsigned long u1;
+
+/*在进入死循环之前，创建Task2*/
+xTaskCreate(vTask2, "Task 2", 1000, NULL, 1, NULL);
+
+  /*和大多数任务一样，处于死循环*/
+  for( ;; )
+  {
+    /*打印任务名字*/
+    vPrintString(pcTaskName);
+
+    /*延时，以产生一个周期*/
+    for(u1 = 0; u1 < mainDELAY_LOOP_COUNT; u1++)
+    {
+      /*空循环，最原始的延时实现方式；可以用delay、sleep代替*/
+    }
+  }
+}
+
+int main(void)
+{
+  /*创建第一个任务。实用的程序应当检测返回值，以确保成功*/
+  xTaskCreate(vTask1,//指向任务函数的指针
+              "Task 1",//任务的文本名字，只会在调试中用到
+              1000,//栈深度，大多数小型微控制器会使用的值会比此值小得多
+              NULL,//没有任务参数
+              1,//此任务运行在优先级1上
+              NULL);//不会用到任务句柄
 
   /*启动调度器，任务开始执行*/
   vTaskStartScheduler();
