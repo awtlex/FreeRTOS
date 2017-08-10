@@ -1,0 +1,18 @@
+Cortex M3 使用低优先级号数值表示逻辑上的高优先级中断。这显得不是那么直
+观，所以很容易被忘记。如果你想对某个中断赋予低优先级，则必须使用一个高优先级
+号数值。千万不要给它指定优先级号0(或是其它低优先级号数值)，因为这将会使得这
+个中断在系统中拥有最高优先级— — 如果这个优先级高于
+configMAX_SYSCALL_INTERRUPT_PRIRITY，将很可能导致系统崩溃。
+Cortex M3 内核的最低优先级为255，但是不同的Cortex M3 处理器厂商实现的优
+先级位数不尽相同，而各自的配套库函数也使用了不同的方式来支持中断优先级。比如
+STM32，ST 的驱动库中将最低优先级指定为15，而最高优先级指定为0。
+
+configKERNEL_INTERRUPT_PRIORITY
+设置系统心跳时钟的中断优先级。
+如果在移植中没有使用常量configMAX_SYSCALL_INTERRUPT_PRIORITY，
+那么需要调用中断安全版本FreeRTOS API的中断都必须运行在此优先级上。
+
+
+
+configMAX_SYSCALL_INTERRUPT_PRIORITY
+设置中断安全版本FreeRTOS API 可以运行的最高中断优先级。
